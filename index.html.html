@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Прогностичний калькулятор відповіді на інгібітори імунних контрольних точок</title>
+    <style>
+        :root {
+            --primary: #1976d2;
+            --primary-dark: #0d47a1;
+            --accent: #009688;
+            --danger: #d32f2f;
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --border-soft: #dde3eb;
+            --text-main: #222;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: radial-gradient(circle at top left, #e3f2fd 0, #f4f6f9 35%, #ffffff 100%);
+            color: var(--text-main);
+        }
+
+        .wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .header-card {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            padding: 18px 24px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            margin-bottom: 22px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .header-text {
+            max-width: 620px;
+        }
+
+        .header-card h1 {
+            margin: 0 0 6px 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .header-card p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .header-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .top-toggle {
+            padding: 4px 12px;
+            font-size: 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .top-toggle:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.1fr);
+            gap: 18px;
+        }
+
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+            border: 1px solid var(--border-soft);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #e0e3ec;
+            background: #fafbff;
+        }
+
+        .question p {
+            margin: 0 0 6px 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2933;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 18px;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .options input[type="radio"] {
+            margin-right: 6px;
+        }
+
+        .options-column {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .options-column label {
+            cursor: default;
+        }
+
+        .options-column input[type="number"],
+        .options-column input[type="text"] {
+            margin-left: 6px;
+            padding: 3px 6px;
+            border-radius: 6px;
+            border: 1px solid #cbd2e1;
+            font-size: 13px;
+        }
+
+        button {
+            padding: 10px 24px;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 999px;
+            border: 1px solid var(--primary-dark);
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            margin-top: 10px;
+            transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 6px 14px rgba(25,118,210,0.35);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 8px rgba(25,118,210,0.3);
+        }
+
+        .note {
+            font-size: 11px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .note-strong {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .result {
+            min-height: 160px;
+            border-radius: 14px;
+            border: 1px solid var(--border-soft);
+            background: #f9fffb;
+            padding: 16px 18px;
+        }
+
+        .result h3 {
+            margin-top: 0;
+            margin-bottom: 4px;
+        }
+
+        .risk-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .risk-low {
+            background: #e3fcec;
+            color: #237804;
+        }
+
+        .risk-intermediate {
+            background: #fff7e6;
+            color: #ad6800;
+        }
+
+        .risk-high {
+            background: #fff1f0;
+            color: #a8071a;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 10px;
+            width: 100%;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid #e0e3ec;
+            padding: 6px 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #f3f4fb;
+            font-weight: 600;
+        }
+
+        .result-note {
+            font-size: 11px;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        .calc-hint {
+            font-size: 11px;
+            color: #4b5563;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+    <div class="header-card">
+        <div class="header-top">
+            <div class="header-text">
+                <h1 id="titleMain">Прогностичний калькулятор відповіді на інгібітори імунних контрольних точок</h1>
+                <p id="titleSubtitle">
+                    IMMU-LUNG SCORE: інструмент стратифікації ризику та прогнозу загальної виживаності у хворих на метастатичний НДРЛ, що планують отримувати імунотерапію.
+                </p>
+            </div>
+            <div class="header-controls">
+                <button type="button" id="langToggle" class="top-toggle">EN</button>
+            
+<button class="nccn-btn" id="nccnButton" onclick="window.open('https://www.nccn.org/guidelines/guidelines-detail?category=1&id=1450','_blank')">
+    Перейти до NCCN-guidelines
+</button>
+
+</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <h2 id="cardParamsTitle">Клініко-біологічні параметри</h2>
+
+            <form id="riskForm">
+
+                <div class="question">
+                    <p id="q1Text">1. Який ECOG-показник пацієнта до початку терапії ІІКТ?</p>
+                    <div class="options">
+                        <label>
+                            <input type="radio" name="ecog" value="0">
+                            <span id="q1o1">0–1 бал</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="ecog" value="1">
+                            <span id="q1o2">2 бали</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q2Text">2. Чи є у пацієнта хронічне обструктивне захворювання легень?</p>
+                    <div class="options">
+                        <label>
+                            <input type="radio" name="copd" value="0">
+                            <span id="q2o1">Немає</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="copd" value="1">
+                            <span id="q2o2">Є</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q3Text">3. Який рівень експресії PD-L1 у пухлині?</p>
+                    <div class="options">
+                        <label>
+                            <input type="radio" name="pdl1" value="0">
+                            <span id="q3o1">0%</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pdl1" value="1">
+                            <span id="q3o2">1–49%</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pdl1" value="2">
+                            <span id="q3o3">≥50%</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q4Text">4. Тютюновий стаж пацієнта</p>
+                    <div class="options options-column">
+                        <label>
+                            <span id="q4labelCigs">Сигарет на день:</span>
+                            <input type="number" id="cigsPerDay" min="0" step="1">
+                        </label>
+                        <label>
+                            <span id="q4labelYears">Тривалість паління, років:</span>
+                            <input type="text" id="yearsSmoking" inputmode="decimal" pattern="[0-9]+([.,][0-9]{1,3})?">
+                        </label>
+                        <div id="packYearsInfo" class="note"></div>
+                        <div id="packYearsHint" class="calc-hint">
+                            Пачко-роки обчислюються автоматично як (сигарет/день ÷ 20) × роки паління.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q5Text">5. Абсолютна кількість нейтрофілів та лімфоцитів</p>
+                    <div class="options options-column">
+                        <label>
+                            <span id="q5labelNeut">Нейтрофіли (×10⁹/л):</span>
+                            <input type="text" id="neut" inputmode="decimal" pattern="[0-9]+([.,][0-9]{1,3})?">
+                        </label>
+                        <label>
+                            <span id="q5labelLymph">Лімфоцити (×10⁹/л):</span>
+                            <input type="text" id="lymph" inputmode="decimal" pattern="[0-9]+([.,][0-9]{1,3})?">
+                        </label>
+                        <div id="nlrInfo" class="note"></div>
+                        <div id="nlrHint" class="calc-hint">
+                            Співвідношення NLR = нейтрофіли / лімфоцити. Високим вважається NLR ≥ 3,6.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q6Text">
+                        6. Чи наявні три фактори ризику: абсолютна кількість лімфоцитів &lt;1,5×10⁹/л, ECOG ≥2, метастази у легенях/плеврі?
+                    </p>
+                    <div class="options">
+                        <label>
+                            <input type="radio" name="lem" value="0">
+                            <span id="q6o1">Ні</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="lem" value="1">
+                            <span id="q6o2">Так</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q7Text">7. Чи перебуває радіологічна щільність підшкірної жирової тканини у межах −100…−106 HU?</p>
+                    <div class="options">
+                        <label>
+                            <input type="radio" name="sat" value="0">
+                            <span id="q7o1">Ні</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="sat" value="1">
+                            <span id="q7o2">Так</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q8Text">8. Показники експресії CD163⁺ та CD68⁺ в пухлинній тканині</p>
+                    <div class="options options-column">
+                        <label>
+                            <span id="q8labelCd163">CD163⁺ (кількість клітин на мм²):</span>
+                            <input type="text" id="cd163val" inputmode="decimal" pattern="[0-9]+([.,][0-9]{1,3})?">
+                        </label>
+                        <label>
+                            <span id="q8labelCd68">CD68⁺ (кількість клітин на мм²):</span>
+                            <input type="text" id="cd68val" inputmode="decimal" pattern="[0-9]+([.,][0-9]{1,3})?">
+                        </label>
+                        <div id="cdInfo" class="note"></div>
+                        <div id="cdHint" class="calc-hint">
+                            Співвідношення CD163/CD68 обчислюється автоматично; високим вважається ≥ 0,48.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q9Text">9. Яка очікувана тривалість терапії інгібіторами імунних контрольних точок?</p>
+                    <div class="options">
+                        <label>
+                            <input type="radio" name="dur" value="1">
+                            <span id="q9o1">&lt; 8 міс.</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="dur" value="0">
+                            <span id="q9o2">≥ 8 міс.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q10Text">10. Чи планується, що пацієнт отримає понад 80% інфузій ІІКТ у період до 12:00?</p>
+                    <div class="options">
+                        <label>
+                            <input type="radio" name="timing" value="1">
+                            <span id="q10o1">Так</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="timing" value="0">
+                            <span id="q10o2">Ні</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <p id="q11Text">11. Чи наразі для лікування пацієнта застосовуються системні кортикостероїди?</p>
+                    <div class="options">
+                        <label>
+                            <input type="radio" name="steroids" value="0">
+                            <span id="q11o1">Ні</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="steroids" value="1">
+                            <span id="q11o2">Так</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="button" id="calcButton" onclick="calculate()">Розрахувати IMMU-LUNG SCORE</button>
+                <div id="noteAllFields" class="note">* Усі поля мають бути заповнені перед розрахунком.</div>
+
+            </form>
+        </div>
+
+        <div class="card">
+            <h2 id="cardResultTitle">Результат</h2>
+            <div id="result" class="result">
+                <p id="resultPlaceholder" style="font-size:13px;color:#555;">
+                    Заповніть форму ліворуч і натисніть «Розрахувати IMMU-LUNG SCORE», щоб отримати групу ризику та прогноз загальної виживаності.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const translations = {
+    uk: {
+        titleMain: "Прогностичний калькулятор відповіді на інгібітори імунних контрольних точок",
+        titleSubtitle: "IMMU-LUNG SCORE: інструмент стратифікації ризику та прогнозу загальної виживаності у хворих на метастатичний НДРЛ, що планують отримувати імунотерапію.",
+        cardParamsTitle: "Клініко-біологічні параметри",
+        cardResultTitle: "Результат",
+
+        q1Text: "1. Який ECOG-показник пацієнта до початку терапії ІІКТ?",
+        q1o1: "0–1 бал",
+        q1o2: "2 бали",
+
+        q2Text: "2. Чи є у пацієнта хронічне обструктивне захворювання легень?",
+        q2o1: "Немає",
+        q2o2: "Є",
+
+        q3Text: "3. Який рівень експресії PD-L1 у пухлині?",
+        q3o1: "0%",
+        q3o2: "1–49%",
+        q3o3: "≥50%",
+
+        q4Text: "4. Тютюновий стаж пацієнта",
+        q4labelCigs: "Сигарет на день:",
+        q4labelYears: "Тривалість паління, років:",
+
+        q5Text: "5. Абсолютна кількість нейтрофілів та лімфоцитів",
+        q5labelNeut: "Нейтрофіли (×10⁹/л):",
+        q5labelLymph: "Лімфоцити (×10⁹/л):",
+
+        q6Text: "6. Чи наявні три фактори ризику: абсолютна кількість лімфоцитів <1,5×10⁹/л, ECOG ≥2, метастази у легенях/плеврі?",
+        q6o1: "Ні",
+        q6o2: "Так",
+
+        q7Text: "7. Чи перебуває радіологічна щільність підшкірної жирової тканини у межах −100…−106 HU?",
+        q7o1: "Ні",
+        q7o2: "Так",
+
+        q8Text: "8. Показники експресії CD163⁺ та CD68⁺ в пухлинній тканині",
+        q8labelCd163: "CD163⁺ (кількість клітин на мм²):",
+        q8labelCd68: "CD68⁺ (кількість клітин на мм²):",
+
+        q9Text: "9. Яка очікувана тривалість терапії інгібіторами імунних контрольних точок?",
+        q9o1: "< 8 міс.",
+        q9o2: "≥ 8 міс.",
+
+        q10Text: "10. Чи планується, що пацієнт отримає понад 80% інфузій ІІКТ у період до 12:00?",
+        q10o1: "Так",
+        q10o2: "Ні",
+
+        q11Text: "11. Чи наразі для лікування пацієнта застосовуються системні кортикостероїди?",
+        q11o1: "Ні",
+        q11o2: "Так",
+
+        packYearsHint: "Пачко-роки обчислюються автоматично як (сигарет/день ÷ 20) × роки паління.",
+        nlrHint: "Співвідношення NLR = нейтрофіли / лімфоцити. Високим вважається NLR ≥ 3,6.",
+        cdHint: "Співвідношення CD163/CD68 обчислюється автоматично; високим вважається ≥ 0,48.",
+        noteAllFields: "* Усі поля мають бути заповнені перед розрахунком.",
+        calcButton: "Розрахувати IMMU-LUNG SCORE",
+        resultPlaceholder: "Заповніть форму ліворуч і натисніть «Розрахувати IMMU-LUNG SCORE», щоб отримати групу ризику та прогноз загальної виживаності.",
+
+        alertMissingFields: "Будь ласка, дайте відповідь на всі запитання перед розрахунком.",
+        alertNumbers: "Перевірте, будь ласка, числові значення (паління, нейтрофіли/лімфоцити, CD163/CD68). Жодне з них не може бути порожнім або некоректним.",
+
+        packYearsLabel: "Розрахований стаж паління:",
+        packYearsUnit: " пачко-років",
+        nlrLabel: "Розрахований NLR:",
+        nlrHighTag: " (високий)",
+        cdLabel: "CD163/CD68:",
+        cdHighTag: " (високе співвідношення)",
+
+        scoreTitle: "Загальний IMMU-LUNG SCORE:",
+        riskLow: "Низький ризик",
+        riskIntermediate: "Проміжний ризик",
+        riskHigh: "Високий ризик",
+
+        medians: {
+            low: "≈36 місяців",
+            intermediate: "≈20 місяців",
+            high: "≈8 місяців"
+        },
+
+        survivalHeading: "Оцінена загальна виживаність для цієї групи ризику",
+        tableTime: "Час від початку ІІКТ",
+        tableSurv: "Ймовірність виживаності",
+        tableCI: "95% довірчий інтервал",
+        monthsSuffix: " міс.",
+        rangeSeparator: "–",
+        medianLabel: "Орієнтовна медіана загальної виживаності:",
+        resultNote: "* Оцінки базуються на каплан-майерівських кривих загальної виживаності для відповідних груп ризику; значення подано як приблизні (%).",
+
+        suggestionsTitle: "Індивідуальні клінічні підказки",
+        clinicalNotesTitle: "Клінічні зауваги"
+        ,nccnButton: "Перейти до NCCN-guidelines"
+    },
+    en: {
+        titleMain: "Prognostic calculator for response to immune checkpoint inhibitors",
+        titleSubtitle: "IMMU-LUNG SCORE: a risk stratification tool for overall survival in patients with metastatic NSCLC scheduled for immunotherapy.",
+        cardParamsTitle: "Clinical and biological parameters",
+        cardResultTitle: "Result",
+
+        q1Text: "1. What is the patient's ECOG performance status before starting ICI therapy?",
+        q1o1: "0–1",
+        q1o2: "2",
+
+        q2Text: "2. Does the patient have chronic obstructive pulmonary disease (COPD)?",
+        q2o1: "No",
+        q2o2: "Yes",
+
+        q3Text: "3. What is the PD-L1 expression level in the tumour?",
+        q3o1: "0%",
+        q3o2: "1–49%",
+        q3o3: "≥50%",
+
+        q4Text: "4. Patient's smoking history",
+        q4labelCigs: "Cigarettes per day:",
+        q4labelYears: "Duration of smoking, years:",
+
+        q5Text: "5. Absolute neutrophil and lymphocyte counts",
+        q5labelNeut: "Neutrophils (×10⁹/L):",
+        q5labelLymph: "Lymphocytes (×10⁹/L):",
+
+        q6Text: "6. Are three risk factors present: lymphocytes <1.5×10⁹/L, ECOG ≥2, and lung/pleural metastases?",
+        q6o1: "No",
+        q6o2: "Yes",
+
+        q7Text: "7. Is subcutaneous adipose tissue radiodensity within −100…−106 HU?",
+        q7o1: "No",
+        q7o2: "Yes",
+
+        q8Text: "8. Expression of CD163⁺ and CD68⁺ in tumour tissue",
+        q8labelCd163: "CD163⁺ (cells per mm²):",
+        q8labelCd68: "CD68⁺ (cells per mm²):",
+
+        q9Text: "9. Expected duration of immune checkpoint inhibitor therapy",
+        q9o1: "< 8 months",
+        q9o2: "≥ 8 months",
+
+        q10Text: "10. Is it planned that more than 80% of ICI infusions will be administered before 12:00?",
+        q10o1: "Yes",
+        q10o2: "No",
+
+        q11Text: "11. Are systemic corticosteroids currently being used in this patient's treatment?",
+        q11o1: "No",
+        q11o2: "Yes",
+
+        packYearsHint: "Pack-years are calculated automatically as (cigarettes/day ÷ 20) × years of smoking.",
+        nlrHint: "NLR = neutrophils / lymphocytes. High NLR is defined as ≥ 3.6.",
+        cdHint: "The CD163/CD68 ratio is calculated automatically; a high ratio is defined as ≥ 0.48.",
+        noteAllFields: "* All fields must be completed before calculation.",
+        calcButton: "Calculate IMMU-LUNG SCORE",
+        resultPlaceholder: "Fill in the form on the left and click “Calculate IMMU-LUNG SCORE” to obtain the risk group and estimated overall survival.",
+
+        alertMissingFields: "Please answer all required questions before calculation.",
+        alertNumbers: "Please check numeric values (smoking, neutrophils/lymphocytes, CD163/CD68). None of them can be empty or invalid.",
+
+        packYearsLabel: "Calculated smoking history:",
+        packYearsUnit: " pack-years",
+        nlrLabel: "Calculated NLR:",
+        nlrHighTag: " (high)",
+        cdLabel: "CD163/CD68:",
+        cdHighTag: " (high ratio)",
+
+        scoreTitle: "Total IMMU-LUNG SCORE:",
+        riskLow: "Low risk",
+        riskIntermediate: "Intermediate risk",
+        riskHigh: "High risk",
+
+        medians: {
+            low: "≈36 months",
+            intermediate: "≈20 months",
+            high: "≈8 months"
+        },
+
+        survivalHeading: "Estimated overall survival for this risk group",
+        tableTime: "Time from ICI start",
+        tableSurv: "Survival probability",
+        tableCI: "95% confidence interval",
+        monthsSuffix: " months",
+        rangeSeparator: "–",
+        medianLabel: "Estimated median overall survival:",
+        resultNote: "* Estimates are based on Kaplan–Meier overall survival curves for the corresponding risk groups; values are approximate (%).",
+
+        suggestionsTitle: "Individual clinical suggestions",
+        clinicalNotesTitle: "Clinical remarks"
+        ,nccnButton: "Open NCCN NSCLC guidelines"
+    }
+};
+
+const riskNotes = {
+    uk: {
+        low: "Пацієнт має сприятливий прогноз та високу ймовірність тривалої відповіді на ІІКТ. Відповідно до чинних клінічних настанов, може бути розглянута монотерапія ІІКТ або хіміоімунотерапія з урахуванням індивідуальних характеристик пацієнта. Моніторинг проводиться за стандартними інтервалами з оцінкою ефективності та токсичності лікування.",
+        intermediate: "Пацієнт має помірну ймовірність відповіді на ІІКТ. Згідно з клінічними настановами, зазвичай розглядається хіміоімунотерапія; у вибраних випадках можлива монотерапія ІІКТ на розсуд лікуючого лікаря. Пацієнт потребує більш частого клінічного та рентгенологічного спостереження для забезпечення раннього виявлення прогресування захворювання та своєчасної корекції лікувальної тактики.",
+        high: "Пацієнт має низьку ймовірність тривалої відповіді на ІІКТ та потребує посиленого моніторингу. Доцільність проведення терапії ІІКТ визначається мультидисциплінарною командою з урахуванням загального стану, супутньої патології та побажань пацієнта. Важливо забезпечити своєчасну верифікацію прогресування захворювання та розгляд альтернативних або комбінованих терапевтичних підходів (зокрема, участі в клінічних дослідженнях) відповідно до клінічних настанов."
+    },
+    en: {
+        low: "The patient has a favorable prognosis and a high likelihood of durable benefit from ICI therapy. In line with current clinical guidelines, ICI monotherapy or chemoimmunotherapy may be considered, taking into account individual patient characteristics. Monitoring should follow standard intervals with regular assessment of treatment efficacy and toxicity.",
+        intermediate: "The patient has a moderate probability of response to ICI therapy. According to clinical guidelines, chemoimmunotherapy is usually considered; in selected cases, ICI monotherapy may be appropriate at the treating physician’s discretion. The patient requires more frequent clinical and radiologic follow-up to ensure early detection of disease progression and timely adjustment of the treatment strategy.",
+        high: "The patient has a low likelihood of durable benefit from ICI therapy and requires intensified surveillance. The appropriateness of initiating or continuing ICI therapy should be determined by a multidisciplinary team, taking into account performance status, comorbidities, and patient preferences. Early confirmation of disease progression and consideration of alternative or combined therapeutic approaches (including participation in clinical trials) in accordance with clinical guidelines are essential."
+    }
+};
+
+const dynamicSuggestions = {
+    uk: {
+        highNLR: "Підвищене співвідношення нейтрофілів до лімфоцитів (NLR) може відображати системне запалення. Розгляньте доцільність проведення дезінтоксикаційних та протизапальних заходів, а також оптимізації супутньої терапії відповідно до клінічних протоколів.",
+        steroids: "Застосування системних кортикостероїдів може знижувати ефективність імунотерапії. За можливості розгляньте варіанти зменшення дози або відміни кортикостероїдів, узгоджуючи зміни зі спеціалістами відповідного профілю.",
+        timingLate: "Більшість інфузій інгібіторів імунних контрольних точок заплановані у другій половині дня. За можливості розгляньте перенесення інфузій на ранкові години для потенційної оптимізації імунної відповіді.",
+        satSuboptimal: "Радіологічна щільність підшкірної жирової тканини відхиляється від діапазону −100…−106 HU. Розгляньте оцінку нутритивного статусу та можливість проведення нутритивної підтримки відповідно до дієтологічних рекомендацій.",
+        shortDur: "Запланована тривалість терапії інгібіторами імунних контрольних точок менше 8 місяців. За відсутності ознак прогресування або неприйнятної токсичності розгляньте можливість продовження терапії ІІКТ щонайменше до 8 місяців відповідно до клінічних настанов та індивідуальних особливостей пацієнта."
+    },
+    en: {
+        highNLR: "An elevated neutrophil-to-lymphocyte ratio (NLR) may reflect systemic inflammation. Consider appropriate detoxification and anti-inflammatory measures, as well as optimization of concomitant therapy in line with clinical protocols.",
+        steroids: "Systemic corticosteroid use may reduce the effectiveness of immunotherapy. Where feasible, consider tapering or discontinuation of corticosteroids in collaboration with the relevant specialists.",
+        timingLate: "Most immune checkpoint inhibitor infusions are scheduled for the afternoon. When possible, consider rescheduling infusions to morning hours to potentially optimize the immune response.",
+        satSuboptimal: "Subcutaneous adipose tissue radiodensity falls outside the −100…−106 HU range. Consider assessment of nutritional status and implementation of nutritional support according to dietetic recommendations.",
+        shortDur: "The planned duration of immune checkpoint inhibitor therapy is shorter than 8 months. In the absence of disease progression or unacceptable toxicity, consider continuing ICI therapy for at least 8 months in accordance with clinical guidelines and individual patient factors."
+    }
+};
+
+let currentLang = 'uk';
+let lastScore = null;
+let lastRiskKey = null;
+let lastPackYears = null;
+let lastNlr = null;
+let lastCdRatio = null;
+let lastConditions = {
+    highNLR: false,
+    steroids: false,
+    timingLate: false,
+    satSuboptimal: false,
+    shortDur: false
+};
+
+const survivalData = {
+    low: {
+        6: 1.0000,
+        12: 1.0000,
+        18: 0.8846,
+        24: 0.7692,
+        30: 0.6130,
+        36: 0.5312
+    },
+    intermediate: {
+        6: 0.8571,
+        12: 0.7143,
+        18: 0.5238,
+        24: 0.3333,
+        30: 0.1429,
+        36: 0.0476
+    },
+    high: {
+        6: 0.7179,
+        12: 0.2821,
+        18: 0.1795,
+        24: 0.0256,
+        30: 0.0256,
+        36: 0.0000
+    }
+};
+
+const ciData = {
+    low: {
+        6: null,
+        12: null,
+        18: [0.6836, 0.9613],
+        24: [0.5569, 0.8891],
+        30: [0.4000, 0.7700],
+        36: [0.3239, 0.7013]
+    },
+    intermediate: {
+        6: [0.6197, 0.9516],
+        12: [0.4715, 0.8602],
+        18: [0.2967, 0.7088],
+        24: [0.1488, 0.5307],
+        30: [0.0357, 0.3212],
+        36: [0.0033, 0.1970]
+    },
+    high: {
+        6: [0.5488, 0.8328],
+        12: [0.1526, 0.4265],
+        18: [0.0790, 0.3128],
+        24: [0.0020, 0.1153],
+        30: [0.0020, 0.1153],
+        36: null
+    }
+};
+
+const months = [6, 12, 18, 24, 30, 36];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const savedLang = localStorage.getItem('immuLang');
+    if (savedLang === 'uk' || savedLang === 'en') currentLang = savedLang;
+
+    applyTranslations();
+
+    const langBtn = document.getElementById('langToggle');
+    if (langBtn) {
+        langBtn.addEventListener('click', () => {
+            currentLang = currentLang === 'uk' ? 'en' : 'uk';
+            localStorage.setItem('immuLang', currentLang);
+            applyTranslations();
+        });
+    }
+});
+
+function parseLocaleNumber(id) {
+    const el = document.getElementById(id);
+    if (!el) return NaN;
+    let raw = (el.value || "").trim();
+    if (raw === "") return NaN;
+    raw = raw.replace(',', '.');
+    raw = raw.replace(/\s+/g, '');
+    return Number(raw);
+}
+
+function applyTranslations() {
+    const t = translations[currentLang];
+
+    const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    };
+
+    setText('titleMain', t.titleMain);
+    setText('titleSubtitle', t.titleSubtitle);
+    setText('cardParamsTitle', t.cardParamsTitle);
+    setText('cardResultTitle', t.cardResultTitle);
+
+    setText('q1Text', t.q1Text);
+    setText('q1o1', t.q1o1);
+    setText('q1o2', t.q1o2);
+
+    setText('q2Text', t.q2Text);
+    setText('q2o1', t.q2o1);
+    setText('q2o2', t.q2o2);
+
+    setText('q3Text', t.q3Text);
+    setText('q3o1', t.q3o1);
+    setText('q3o2', t.q3o2);
+    setText('q3o3', t.q3o3);
+
+    setText('q4Text', t.q4Text);
+    setText('q4labelCigs', t.q4labelCigs);
+    setText('q4labelYears', t.q4labelYears);
+
+    setText('q5Text', t.q5Text);
+    setText('q5labelNeut', t.q5labelNeut);
+    setText('q5labelLymph', t.q5labelLymph);
+
+    setText('q6Text', t.q6Text);
+    setText('q6o1', t.q6o1);
+    setText('q6o2', t.q6o2);
+
+    setText('q7Text', t.q7Text);
+    setText('q7o1', t.q7o1);
+    setText('q7o2', t.q7o2);
+
+    setText('q8Text', t.q8Text);
+    setText('q8labelCd163', t.q8labelCd163);
+    setText('q8labelCd68', t.q8labelCd68);
+
+    setText('q9Text', t.q9Text);
+    setText('q9o1', t.q9o1);
+    setText('q9o2', t.q9o2);
+
+    setText('q10Text', t.q10Text);
+    setText('q10o1', t.q10o1);
+    setText('q10o2', t.q10o2);
+
+    setText('q11Text', t.q11Text);
+    setText('q11o1', t.q11o1);
+    setText('q11o2', t.q11o2);
+
+    setText('packYearsHint', t.packYearsHint);
+    setText('nlrHint', t.nlrHint);
+    setText('cdHint', t.cdHint);
+    setText('noteAllFields', t.noteAllFields);
+    setText('calcButton', t.calcButton);
+    setText('nccnButton', t.nccnButton);
+
+    const resultPlaceholder = document.getElementById('resultPlaceholder');
+    if (resultPlaceholder && lastScore === null) {
+        resultPlaceholder.textContent = t.resultPlaceholder;
+    }
+
+    const langBtn = document.getElementById('langToggle');
+    if (langBtn) {
+        langBtn.textContent = currentLang === 'uk' ? 'EN' : 'UA';
+    }
+
+    updateDerivedInfo();
+    if (lastScore !== null && lastRiskKey) {
+        renderResult(lastScore, lastRiskKey);
+    }
+}
+
+function updateDerivedInfo() {
+    const t = translations[currentLang];
+
+    const packDiv = document.getElementById('packYearsInfo');
+    if (packDiv) {
+        if (lastPackYears !== null) {
+            packDiv.innerHTML =
+                '<span class="note-strong">' + t.packYearsLabel + '</span> ' +
+                lastPackYears.toFixed(1) + t.packYearsUnit;
+        } else {
+            packDiv.textContent = '';
+        }
+    }
+
+    const nlrDiv = document.getElementById('nlrInfo');
+    if (nlrDiv) {
+        if (lastNlr !== null) {
+            const highTag = lastNlr >= 3.6 ? t.nlrHighTag : '';
+            nlrDiv.innerHTML =
+                '<span class="note-strong">' + t.nlrLabel + '</span> ' +
+                lastNlr.toFixed(3) + highTag;
+        } else {
+            nlrDiv.textContent = '';
+        }
+    }
+
+    const cdDiv = document.getElementById('cdInfo');
+    if (cdDiv) {
+        if (lastCdRatio !== null) {
+            const highTag = lastCdRatio >= 0.48 ? t.cdHighTag : '';
+            cdDiv.innerHTML =
+                '<span class="note-strong">' + t.cdLabel + '</span> ' +
+                lastCdRatio.toFixed(3) + highTag;
+        } else {
+            cdDiv.textContent = '';
+        }
+    }
+}
+
+function calculate() {
+    const t = translations[currentLang];
+
+    const radioFields = ["ecog", "copd", "pdl1", "lem", "sat", "dur", "timing", "steroids"];
+    for (let name of radioFields) {
+        if (!document.querySelector('input[name="' + name + '"]:checked')) {
+            alert(t.alertMissingFields);
+            return;
+        }
+    }
+
+    const ecog     = Number(document.querySelector('input[name="ecog"]:checked').value);
+    const copd     = Number(document.querySelector('input[name="copd"]:checked').value);
+    const pdl1     = Number(document.querySelector('input[name="pdl1"]:checked').value);
+    const lem3     = Number(document.querySelector('input[name="lem"]:checked').value);
+    const satq2    = Number(document.querySelector('input[name="sat"]:checked').value);
+    const dur      = Number(document.querySelector('input[name="dur"]:checked').value);
+    const timing   = Number(document.querySelector('input[name="timing"]:checked').value);
+    const steroids = Number(document.querySelector('input[name="steroids"]:checked').value);
+
+    const cigsPerDay   = Number(document.getElementById("cigsPerDay").value);
+    const yearsSmoking = parseLocaleNumber("yearsSmoking");
+    const neut         = parseLocaleNumber("neut");
+    const lymph        = parseLocaleNumber("lymph");
+    const cd163val     = parseLocaleNumber("cd163val");
+    const cd68val      = parseLocaleNumber("cd68val");
+
+    if (
+        isNaN(cigsPerDay) || isNaN(yearsSmoking) ||
+        isNaN(neut) || isNaN(lymph) ||
+        isNaN(cd163val) || isNaN(cd68val) ||
+        cigsPerDay < 0 || yearsSmoking < 0 ||
+        neut <= 0 || lymph <= 0 ||
+        cd163val < 0 || cd68val <= 0
+    ) {
+        alert(t.alertNumbers);
+        return;
+    }
+
+    let score = 0;
+
+    if (ecog === 1) score += 3;        // ECOG 2
+    if (copd === 1) score -= 4;        // COPD
+
+    if (pdl1 === 0) score += 2;        // PD-L1 0%
+    if (pdl1 === 1) score += 2;        // PD-L1 1–49%
+
+    const packYears = (cigsPerDay / 20) * yearsSmoking;
+    lastPackYears = packYears;
+
+    const nlrValue = neut / lymph;
+    lastNlr = nlrValue;
+
+    const cdRatio = cd163val / cd68val;
+    lastCdRatio = cdRatio;
+
+    if (packYears >= 28) {
+        score -= 2;                    // ≥28 пачко-років
+    }
+
+    if (nlrValue >= 3.6) {
+        score += 2;                    // High NLR
+    }
+
+    if (lem3 === 1) score += 1;        // LEM = 3 factors
+    if (satq2 === 1) score -= 2;       // Q2 SAT protective
+
+    if (cdRatio >= 0.48) {
+        score += 3;                    // CD163/CD68 high
+    }
+
+    if (dur === 1) score += 3;         // ІІКТ < 8 місяців
+    if (timing === 0) score += 2;      // <80% інфузій до 12:00
+    if (steroids === 1) score += 3;    // системні ГКС
+
+    // умови для індивідуальних підказок
+    lastConditions.highNLR = (nlrValue >= 3.6);
+    lastConditions.steroids = (steroids === 1);
+    lastConditions.timingLate = (timing === 0);
+    lastConditions.satSuboptimal = (satq2 === 0);
+    lastConditions.shortDur = (dur === 1);
+
+    let riskKey   = "";
+    if (score <= 2) {
+        riskKey = "low";
+    } else if (score <= 6) {
+        riskKey = "intermediate";
+    } else {
+        riskKey = "high";
+    }
+
+    lastScore = score;
+    lastRiskKey = riskKey;
+
+    updateDerivedInfo();
+    renderResult(score, riskKey);
+}
+
+function renderResult(score, riskKey) {
+    const t = translations[currentLang];
+    const ds = dynamicSuggestions[currentLang];
+    const rnLang = riskNotes[currentLang];
+    const resultDiv = document.getElementById("result");
+    if (!resultDiv) return;
+
+    let riskLabel = "";
+    let riskClass = "";
+
+    if (riskKey === "low") {
+        riskLabel = t.riskLow;
+        riskClass = "risk-chip risk-low";
+    } else if (riskKey === "intermediate") {
+        riskLabel = t.riskIntermediate;
+        riskClass = "risk-chip risk-intermediate";
+    } else {
+        riskLabel = t.riskHigh;
+        riskClass = "risk-chip risk-high";
+    }
+
+    const medians = t.medians;
+    const surv   = survivalData[riskKey];
+    const ci     = ciData[riskKey];
+
+    let tableHtml = `
+        <h3>${t.survivalHeading}</h3>
+        <table>
+            <tr>
+                <th>${t.tableTime}</th>
+                <th>${t.tableSurv}</th>
+                <th>${t.tableCI}</th>
+            </tr>
+    `;
+
+    months.forEach(function(m) {
+        const prob = surv[m];
+        const percent = "≈" + Math.round(prob * 100) + "%";
+
+        let ciText = "—";
+        const ciPair = ci[m];
+        if (ciPair !== null) {
+            const lowP  = Math.round(ciPair[0] * 100);
+            const highP = Math.round(ciPair[1] * 100);
+            ciText = "≈" + lowP + t.rangeSeparator + highP + "%";
+        }
+
+        tableHtml += `
+            <tr>
+                <td>${m}${t.monthsSuffix}</td>
+                <td>${percent}</td>
+                <td>${ciText}</td>
+            </tr>
+        `;
+    });
+
+    tableHtml += "</table>";
+
+    // клінічні зауваги для групи ризику
+    let clinicalHtml = "";
+    if (rnLang && rnLang[riskKey]) {
+        clinicalHtml = `
+            <h4>${t.clinicalNotesTitle}</h4>
+            <p>${rnLang[riskKey]}</p>
+        `;
+    }
+
+    // індивідуальні клінічні підказки
+    let suggestions = [];
+    if (lastConditions.highNLR)       suggestions.push(ds.highNLR);
+    if (lastConditions.steroids)      suggestions.push(ds.steroids);
+    if (lastConditions.timingLate)    suggestions.push(ds.timingLate);
+    if (lastConditions.satSuboptimal) suggestions.push(ds.satSuboptimal);
+    if (lastConditions.shortDur)      suggestions.push(ds.shortDur);
+
+    let suggestionsHtml = "";
+    if (suggestions.length > 0) {
+        suggestionsHtml = `
+            <h4>${t.suggestionsTitle}</h4>
+            <ul>
+                ${suggestions.map(s => `<li>${s}</li>`).join("")}
+            </ul>
+        `;
+    }
+
+    resultDiv.innerHTML =
+        `<h3>${t.scoreTitle} ${score}</h3>
+         <div class="${riskClass}">${riskLabel}</div>
+         <p><strong>${t.medianLabel}</strong> ${medians[riskKey]}</p>
+         ${tableHtml}
+         ${clinicalHtml}
+         ${suggestionsHtml}
+         <p class="result-note">${t.resultNote}</p>`;
+}
+</script>
+
+</body>
+</html>
